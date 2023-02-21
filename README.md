@@ -8,4 +8,4 @@ In total, I scraped 500 jobs from 20 pages. However, upon analyzing the DataFram
 
 Finally, I presented my findings in a 5-minute presentation to my class in the Bootcamp. Through this project, I gained experience with various libraries, learned to create new DataFrames, and explored new things. I found webscraping to be a fun and exciting way to extract data and insights that are of personal interest.
 
-All of my visualizations from the DataFrames are inside the MP4 file. I will upload the different codes I used to create this project, as well as an MP4 file for the presentation. Please feel free to contact me if you have any insights or questions.
+All of my visualizations from the DataFrames are inside the MP4 file. I uploaded the code I used to create this project, the diffrent DataFrames i made and the MP4 file for the presentation. Please feel free to contact me if you have any insights or questions.
