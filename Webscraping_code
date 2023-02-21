@@ -1,0 +1,109 @@
+import time
+import os
+import re
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+
+from bs4 import BeautifulSoup as bs
+import requests
+
+import pandas as pd
+
+driver = webdriver.Chrome("C:\Anton\chromedriver.exe")
+
+soup = bs(driver.page_source, "lxml")
+
+url = "https://arbetsformedlingen.se/platsbanken/annonser?q=data"
+base_url = "https://arbetsformedlingen.se/platsbanken/annonser?q=data&page="
+
+max_pages = 20
+
+annonser_href = ["https://arbetsformedlingen.se" + a['href'] for a in soup.find_all('a', href=True) if "/platsbanken/annonser/" in a['href']]
+annonser_href
+
+def make_clickable(titel, annonser_href):
+    return '<a href="{}">{}</a>'.format(annonser_href, titel)
+
+# Create an empty lists to store the results
+results = []
+languages_list = []
+
+for page in range(1, max_pages + 1):
+    # Construct the URL for the current page
+    url = base_url + str(page)
+    
+    # Open the URL in the webdriver
+    time.sleep(2.5)
+    driver.get(url)    
+    time.sleep(2.5)
+    
+    # Use BeautifulSoup to parse the HTML
+    soup = bs(driver.page_source, 'html.parser')
+    
+    # Get the href values for the job listings
+    annonser_href = ["https://arbetsformedlingen.se" + a['href'] for a in soup.find_all('a', href=True) if "/platsbanken/annonser/" in a['href']]
+    
+    # Loop through the job listings
+    for url in annonser_href:
+        # Open the URL in the webdriver
+        time.sleep(2.5)
+        driver.get(url)    
+        time.sleep(2.5)
+        agree_key = "button.af-cms-btn.af-cms-btn--primary.square.compact"
+        agree = driver.find_element(By.CSS_SELECTOR, agree_key) # find the button
+        agree.click() 
+        time.sleep(5)
+        # Use BeautifulSoup to parse the HTML
+        soup2 = bs(driver.page_source, 'html.parser')
+        # Select the desired element using the CSS selector
+        # Omfattning
+        key = "div.print-break-inside>div>span:nth-child(2)"
+        omfattning = soup2.select(key)[0].text
+        # Varaktighet
+        key1 = "div.print-break-inside>div>span"
+        varaktighet = soup2.select(key1)[3].text
+        # Titel
+        key2 = "h1"
+        titel = soup2.select(key2)[0].text
+        # Anställningsform
+        key3 = "div.print-break-inside>div>span"
+        form = soup2.select(key3)[5].text
+        # sleep
+        time.sleep(2)
+        # Ansök senast
+        key4 = "div.print-break-inside>div>div>strong"
+        try:
+            sok = soup2.select(key4)[0].text
+        except IndexError:
+            sok = "Annons borta"
+        # Företag
+        key5 = "h2"
+        foretag = soup2.select(key5)[0].text
+        # RegEx for the languages
+        key6 = soup2.select("div.section.job-description")[0].text
+        languages = re.findall("Python|SQL", key6)
+        unique_languages = set(languages)
+        languages = ', '.join(list(unique_languages))
+        languages_list.append(languages)
+        # Adding area and removing "kommun"
+        key7 = "h3"
+        area = soup2.select("h3")[1].text
+        area = area.replace("Kommun: ", "")
+        # Append it all to DF
+        results.append({"Jobbtitel": make_clickable(titel, url), "Företag": foretag, "Omfattning": omfattning, "Varaktighet": varaktighet, 
+               "Anställningsform": form, "Ansök Senast": sok, "Område": area})
+        time.sleep(5)
+        driver.quit()
+        driver = webdriver.Chrome("C:\Anton\chromedriver.exe")
+
+# Create the dataframe
+driver.quit()
+df = pd.DataFrame(results)
+df['Languages'] = languages_list
+
+# Uncomment to add hyperlink
+# --------------------------------------------
+# df.style.format({'Jobbtitel': lambda x: x})
+# --------------------------------------------
