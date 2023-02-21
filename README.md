@@ -1,5 +1,6 @@
 Webscraping-Project-Arbetsförmedlingen
 Scraping jobs from the Swedish Public Employment Service website
+https://arbetsformedlingen.se/
 
 As part of my NOD Bootcamp project, I worked on webscraping the Arbetsförmedlingen website for jobs related to my interests in the field of data. To achieve this, I used Selenium to scrape information from the website and made sure to accept the 'Cookies' for each URL so that the paths were correct.
 
